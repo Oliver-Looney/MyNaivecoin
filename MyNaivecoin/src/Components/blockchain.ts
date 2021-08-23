@@ -1,5 +1,6 @@
-import { sha256 } from "js-sha256";
+import {sha256} from "js-sha256";
 import {Block} from "./Block";
+import {broadcastLatest} from './main';
 
 
 const calculateHash = (index: number, previousHash: string, timestamp: number, data: string): string =>
@@ -11,20 +12,31 @@ const genesisBlock: Block = new Block(0,
     1629747054,
     "My Genesis Block");
 
-const getLatestBlock = ()=> {
-    return blockchain[blockchain.length-1];
+const getLatestBlock = () => {
+    return blockchain[blockchain.length - 1];
+}
+ const getBlockchain = () => {
+    return blockchain;
 }
 
-const generateNextBlock = (blockData: string) => {
+ const generateNextBlock = (blockData: string) => {
     const previousBlock: Block = getLatestBlock();
     const nextIndex: number = previousBlock.index + 1;
-    const nextTimestamp: number = new Date().getTime()/1000;
+    const nextTimestamp: number = new Date().getTime() / 1000;
     const nextHash: string = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
     const newBlock: Block = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData);
+    addBlock(newBlock);
+    broadcastLatest();
     return newBlock;
 }
 
-const blockchain: Block[] = [genesisBlock];
+const addBlock = (newBlock:Block)=>{
+    if(isNewBlockValid(newBlock,getLatestBlock())){
+        blockchain.push(newBlock);
+    }
+}
+
+let blockchain: Block[] = [genesisBlock];
 
 const calculateHashForBlock = (inputtedBlock: Block): string => {
     return calculateHash(inputtedBlock.index, inputtedBlock.previousHash, inputtedBlock.timestamp, inputtedBlock.data);
@@ -60,26 +72,44 @@ const isNewBlockValid = (newBlock: Block, previousBlock: Block) => {
  * @return boolean
  */
 const isValidBlockStructure = (block: Block): boolean => {
-    return typeof block.index==='number'
-    && typeof block.hash==='string'
-    && typeof block.timestamp==='number'
-    && typeof block.data==='string';
+    return typeof block.index === 'number'
+        && typeof block.hash === 'string'
+        && typeof block.timestamp === 'number'
+        && typeof block.data === 'string';
 }
 
 
-const isValidChain = (blockchainToValidate:Block[]):boolean=>{
-    const isValidGenesis = (block:Block):boolean=>{
+const isValidChain = (blockchainToValidate: Block[]): boolean => {
+    const isValidGenesis = (block: Block): boolean => {
         return JSON.stringify(block) === JSON.stringify(genesisBlock);
     };
-
-    if(!isValidGenesis(blockchain[0])){
+    if (!isValidGenesis(blockchain[0])) {
         return false;
     }
-
-    for(let i=0;i<blockchainToValidate.length;i++){
-        if(!isNewBlockValid(blockchainToValidate[i],blockchainToValidate[i-1])){
+    for (let i = 0; i < blockchainToValidate.length; i++) {
+        if (!isNewBlockValid(blockchainToValidate[i], blockchainToValidate[i - 1])) {
             return false;
         }
     }
     return true;
 }
+
+const replaceChain = (newBlocks: Block[]) => {
+    if (isValidChain(newBlocks) && newBlocks.length > blockchain.length) {
+        console.log("Received blockchain is valid, replacing current blockchain with recieved blockchain");
+        blockchain = newBlocks;
+        broadcastLatest();
+    } else {
+        console.log("Recieved blockchain is invalid");
+    }
+}
+
+const addBlockToChain = (newBlock:Block):boolean=>{
+    if(isNewBlockValid(newBlock,getLatestBlock())){
+        blockchain.push(newBlock);
+        return true;
+    }
+    return false;
+}
+
+export {Block, getBlockchain, getLatestBlock, generateNextBlock, isValidBlockStructure, replaceChain, addBlockToChain};
