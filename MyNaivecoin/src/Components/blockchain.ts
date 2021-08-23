@@ -24,15 +24,54 @@ const genesisBlock: Block = new Block(0,
     Date("2021-08-23"),
     "My Genesis Block");
 
-const generateNextBlock = (blockData:string)=>{
+const generateNextBlock = (blockData: string) => {
     const previousBlock: Block = getLatestBlock();
-    const nextIndex: number = previousBlock.index+1;
+    const nextIndex: number = previousBlock.index + 1;
     const nextTimestamp: Date = new Date();
-    const nextHash:string = calculateHash(nextIndex,previousBlock.hash,nextTimestamp,blockData);
-    const newBlock:Block = new Block(nextIndex,nextHash,previousBlock.hash,nextTimestamp,blockData);
+    const nextHash: string = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
+    const newBlock: Block = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData);
     return newBlock;
 }
 
 const blockchain: Block[] = [genesisBlock];
 
+const calculateHashForBlock = (inputtedBlock: Block): string => {
+    return calculateHash(inputtedBlock.index, inputtedBlock.previousHash, inputtedBlock.timestamp);
+}
+
+/**
+ * Returns Boolean of validity of block
+ *
+ * @param newBlock - The new block being validated
+ * @param previousBlock - The latest block in the chain, being used to validate newBlock
+ * @return boolean
+ */
+const isNewBlockValid = (newBlock: Block, previousBlock: Block) => {
+    if (previousBlock.index + 1 !== newBlock.index) {
+        console.log("Invalid Index");
+        return false;
+    }
+    if (previousBlock.hash !== newBlock.previousHash) {
+        console.log("Invalid Previous Hash");
+        return false;
+    }
+    if (calculateHashForBlock(newBlock) !== newBlock.hash) {
+        console.log(typeof (newBlock.hash) + " " + typeof calculateHashForBlock(newBlock));
+        console.log("Invalid hash: " + calculateHashForBlock(newBlock) + " " + newBlock.hash);
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Returns Boolean of validity of block structure
+ * @param block - Block getting it's structure verified
+ * @return boolean
+ */
+const isValidBlockStructure = (block: Block): boolean => {
+    return typeof block.index==='number'
+    && typeof block.hash==='string'
+    && typeof block.timestamp==='Date'
+    && typeof block.data==='string';
+}
 
