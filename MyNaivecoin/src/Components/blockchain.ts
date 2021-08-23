@@ -21,7 +21,7 @@ const calculateHash = (index: number, previousHash: string, timestamp: Date, dat
 const genesisBlock: Block = new Block(0,
     "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
     null,
-    Date("2021-08-23"),
+    Date("August 23, 2021 19:13:00"),
     "My Genesis Block");
 
 const generateNextBlock = (blockData: string) => {
@@ -60,7 +60,7 @@ const isNewBlockValid = (newBlock: Block, previousBlock: Block) => {
         console.log("Invalid hash: " + calculateHashForBlock(newBlock) + " " + newBlock.hash);
         return false;
     }
-    return true;
+    return isValidBlockStructure(newBlock);
 }
 
 /**
@@ -75,3 +75,20 @@ const isValidBlockStructure = (block: Block): boolean => {
     && typeof block.data==='string';
 }
 
+
+const isValidChain = (blockchainToValidate:Block[]):boolean=>{
+    const isValidGenesis = (block:Block):boolean=>{
+        return JSON.stringify(block) === JSON.stringify(genesisBlock);
+    };
+
+    if(!isValidGenesis(blockchain[0])){
+        return false;
+    }
+
+    for(let i=0;i<blockchainToValidate.length;i++){
+        if(!isNewBlockValid(blockchainToValidate[i],blockchainToValidate[i-1])){
+            return false;
+        }
+    }
+    return true;
+}
