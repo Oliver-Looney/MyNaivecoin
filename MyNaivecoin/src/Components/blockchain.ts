@@ -1,6 +1,6 @@
 import {sha256} from "js-sha256";
 import {Block} from "./Block";
-import {broadcastLatest} from './main';
+import {broadcastLatest} from './peer2peer';
 
 
 const calculateHash = (index: number, previousHash: string, timestamp: number, data: string): string =>
@@ -8,7 +8,7 @@ const calculateHash = (index: number, previousHash: string, timestamp: number, d
 
 const genesisBlock: Block = new Block(0,
     "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
-    null,
+    "null",
     1629747054,
     "My Genesis Block");
 

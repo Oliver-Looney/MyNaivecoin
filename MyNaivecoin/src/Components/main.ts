@@ -4,8 +4,8 @@ import {connectToPeers, getSockets, initP2PServer} from './peer2peer';
 import * as  bodyParser from 'body-parser';
 import * as express from 'express';
 
-const httpPort: number = parseInt(process.env.HTTP_PORT) || 3001;
-const p2pPort: number = parseInt(process.env.P2P_PORT) || 6001;
+const httpPort: number =  3011;
+const p2pPort: number =  6001;
 
 const sockets: WebSocket[] = [];
 
