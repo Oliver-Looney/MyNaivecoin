@@ -1,33 +1,24 @@
-class Block {
-    public index: number;
-    public hash: string;
-    public previousHash: string;
-    public timestamp: Date;
-    public data: string;
-
-    constructor(index: number, hash: string, previousHash: string, timestamp: Date, data: string) {
-        this.index = index;
-        this.hash = hash;
-        this.previousHash = previousHash;
-        this.timestamp = timestamp;
-        this.data = data;
-    }
-}
+import { sha256 } from "js-sha256";
+import {Block} from "./Block";
 
 
-const calculateHash = (index: number, previousHash: string, timestamp: Date, data: string): string =>
-    js - sha256(index + previousHash + timestamp.toString() + data).toString();
+const calculateHash = (index: number, previousHash: string, timestamp: number, data: string): string =>
+    sha256(index + previousHash + timestamp.toString() + data).toString();
 
 const genesisBlock: Block = new Block(0,
     "816534932c2b7154836da6afc367695e6337db8a921823784c14378abed4f7d7",
     null,
-    Date("August 23, 2021 19:13:00"),
+    1629747054,
     "My Genesis Block");
+
+const getLatestBlock = ()=> {
+    return blockchain[blockchain.length-1];
+}
 
 const generateNextBlock = (blockData: string) => {
     const previousBlock: Block = getLatestBlock();
     const nextIndex: number = previousBlock.index + 1;
-    const nextTimestamp: Date = new Date();
+    const nextTimestamp: number = new Date().getTime()/1000;
     const nextHash: string = calculateHash(nextIndex, previousBlock.hash, nextTimestamp, blockData);
     const newBlock: Block = new Block(nextIndex, nextHash, previousBlock.hash, nextTimestamp, blockData);
     return newBlock;
@@ -36,7 +27,7 @@ const generateNextBlock = (blockData: string) => {
 const blockchain: Block[] = [genesisBlock];
 
 const calculateHashForBlock = (inputtedBlock: Block): string => {
-    return calculateHash(inputtedBlock.index, inputtedBlock.previousHash, inputtedBlock.timestamp);
+    return calculateHash(inputtedBlock.index, inputtedBlock.previousHash, inputtedBlock.timestamp, inputtedBlock.data);
 }
 
 /**
@@ -71,7 +62,7 @@ const isNewBlockValid = (newBlock: Block, previousBlock: Block) => {
 const isValidBlockStructure = (block: Block): boolean => {
     return typeof block.index==='number'
     && typeof block.hash==='string'
-    && typeof block.timestamp==='Date'
+    && typeof block.timestamp==='number'
     && typeof block.data==='string';
 }
 
